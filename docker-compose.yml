@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DatabaseOptions__DefaultConnection: Data Source=/app/data/DateMatcher.db
+    volumes:
+      - datematcher-data:/app/data
+
+volumes:
+  datematcher-data:

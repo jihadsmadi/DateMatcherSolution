@@ -1,0 +1,222 @@
+@page
+@model LogsModel
+@{
+    ViewData["Title"] = "Search Logs";
+    var logs = Model.Logs;
+}
+
+<div class="page-header mb-4">
+    <div>
+        <p class="page-eyebrow mb-1">Activity</p>
+        <h1 class="page-title mb-2">Search Logs</h1>
+        <p class="page-subtitle mb-0">Review past searches, outcomes, and performance.</p>
+    </div>
+    <div class="page-header-meta">
+        <span class="stat-pill">@logs.TotalCount @(logs.TotalCount == 1 ? "result" : "results")</span>
+    </div>
+</div>
+
+<div class="card app-card">
+    <div class="card-body p-0">
+        @if (logs.Items.Count == 0)
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h2 class="h5 mb-2">No search logs yet</h2>
+                <p class="text-muted mb-3">Run a search on the home page and results will appear here.</p>
+                <a asp-page="/Index" class="btn btn-primary">Go to Search</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover log-table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col" aria-sort="@Model.GetSortAriaSort("id")">
+                                <a class="sort-header" asp-page="/Logs" asp-all-route-data="@Model.GetSortRouteValues("id")">
+                                    # <span class="sort-indicator">@Model.GetSortIndicator("id")</span>
+                                </a>
+                            </th>
+                            <th scope="col" aria-sort="@Model.GetSortAriaSort("createdAt")">
+                                <a class="sort-header" asp-page="/Logs" asp-all-route-data="@Model.GetSortRouteValues("createdAt")">
+                                    When <span class="sort-indicator">@Model.GetSortIndicator("createdAt")</span>
+                                </a>
+                            </th>
+                            <th scope="col" aria-sort="@Model.GetSortAriaSort("criteria")">
+                                <a class="sort-header" asp-page="/Logs" asp-all-route-data="@Model.GetSortRouteValues("criteria")">
+                                    Criteria <span class="sort-indicator">@Model.GetSortIndicator("criteria")</span>
+                                </a>
+                            </th>
+                            <th scope="col" aria-sort="@Model.GetSortAriaSort("status")">
+                                <a class="sort-header" asp-page="/Logs" asp-all-route-data="@Model.GetSortRouteValues("status")">
+                                    Status <span class="sort-indicator">@Model.GetSortIndicator("status")</span>
+                                </a>
+                            </th>
+                            <th scope="col" class="text-end">Matches</th>
+                            <th scope="col" class="text-end" aria-sort="@Model.GetSortAriaSort("duration")">
+                                <a class="sort-header sort-header-end" asp-page="/Logs" asp-all-route-data="@Model.GetSortRouteValues("duration")">
+                                    Duration <span class="sort-indicator">@Model.GetSortIndicator("duration")</span>
+                                </a>
+                            </th>
+                            <th scope="col">Error</th>
+                            <th scope="col" class="text-end">Response</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in logs.Items)
+                        {
+                            <tr class="log-row">
+                                <td class="text-muted">@log.Id</td>
+                                <td>
+                                    <div class="log-time">@log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</div>
+                                    <div class="log-time-sub">@log.CreatedAt.ToLocalTime().ToString("HH:mm:ss")</div>
+                                </td>
+                                <td>
+                                    <div class="log-criteria">
+                                        <span>@log.StartYear – @log.EndYear</span>
+                                        <span class="text-muted">·</span>
+                                        <span>Day @log.DayOfMonth</span>
+                                        <span class="text-muted">·</span>
+                                        <span>@log.DayOfWeek</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (log.Success)
+                                    {
+                                        <span class="badge status-badge status-success">Success</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge status-badge status-failed">Failed</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (log.Success && log.MatchCount.HasValue)
+                                    {
+                                        <span class="fw-semibold">@log.MatchCount</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <span class="duration-pill">@log.ExecutionTimeMs ms</span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(log.ErrorMessage))
+                                    {
+                                        <span class="log-error" title="@log.ErrorMessage">@log.ErrorMessage</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary log-view-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#logResponseModal"
+                                            data-log-id="@log.Id"
+                                            data-log-status="@(log.Success ? "Success" : "Failed")"
+                                            data-log-criteria="@($"{log.StartYear}–{log.EndYear}, day {log.DayOfMonth}, {log.DayOfWeek}")"
+                                            data-log-error="@log.ErrorMessage">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (logs.TotalPages > 1)
+            {
+                <div class="card-footer log-pagination-footer">
+                    <div class="log-pagination-summary">
+                        Showing @(((logs.Page - 1) * logs.PageSize) + 1)–@(Math.Min(logs.Page * logs.PageSize, logs.TotalCount)) of @logs.TotalCount
+                    </div>
+                    <nav aria-label="Search log pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item @(logs.HasPreviousPage ? "" : "disabled")">
+                                <a class="page-link" asp-page="/Logs" asp-all-route-data="@Model.GetRouteValues(logs.Page - 1)" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+
+                            @{
+                                var startPage = Math.Max(1, logs.Page - 2);
+                                var endPage = Math.Min(logs.TotalPages, logs.Page + 2);
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" asp-page="/Logs" asp-all-route-data="@Model.GetRouteValues(1)">1</a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                }
+                            }
+
+                            @for (var pageNum = startPage; pageNum <= endPage; pageNum++)
+                            {
+                                <li class="page-item @(pageNum == logs.Page ? "active" : "")">
+                                    <a class="page-link" asp-page="/Logs" asp-all-route-data="@Model.GetRouteValues(pageNum)">@pageNum</a>
+                                </li>
+                            }
+
+                            @if (endPage < logs.TotalPages)
+                            {
+                                @if (endPage < logs.TotalPages - 1)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" asp-page="/Logs" asp-all-route-data="@Model.GetRouteValues(logs.TotalPages)">@logs.TotalPages</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(logs.HasNextPage ? "" : "disabled")">
+                                <a class="page-link" asp-page="/Logs" asp-all-route-data="@Model.GetRouteValues(logs.Page + 1)" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="logResponseModal" tabindex="-1" aria-labelledby="logResponseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="logResponseModalLabel">Response details</h5>
+                    <p class="modal-subtitle mb-0" id="logResponseModalMeta"></p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="logResponseErrorWrap" class="alert alert-danger d-none" role="alert">
+                    <strong>Error:</strong> <span id="logResponseError"></span>
+                </div>
+                <label class="form-label fw-semibold small text-muted text-uppercase">Response JSON</label>
+                <pre class="log-response-preview mb-0" id="logResponseBody"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/logs.js" asp-append-version="true"></script>
+}

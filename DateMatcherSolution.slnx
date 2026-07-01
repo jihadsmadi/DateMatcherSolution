@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DateMatcher.Application/DateMatcher.Application.csproj" />
+    <Project Path="src/DateMatcher.Domain/DateMatcher.Domain.csproj" />
+    <Project Path="src/DateMatcher.Infrastructure/DateMatcher.Infrastructure.csproj" />
+    <Project Path="src/DateMatcher.Web/DateMatcher.Web.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,78 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Date Matcher";
+}
+
+<div class="page-header mb-4">
+    <div>
+        <p class="page-eyebrow mb-1">Search</p>
+        <h1 class="page-title mb-2">Find matching dates</h1>
+        <p class="page-subtitle mb-0">
+            Discover month–year combinations where a specific day falls on your chosen weekday.
+        </p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card app-card search-form-card h-100">
+            <div class="card-header app-card-header">
+                <h2 class="h6 mb-0">Search criteria</h2>
+            </div>
+            <div class="card-body">
+                <form id="searchForm" novalidate>
+                    <div id="searchErrors" class="alert alert-danger py-2 mb-3 d-none" role="alert"></div>
+
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label asp-for="SearchRequest.StartYear" class="form-label fw-semibold"></label>
+                            <input asp-for="SearchRequest.StartYear" class="form-control form-control-lg" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="SearchRequest.EndYear" class="form-label fw-semibold"></label>
+                            <input asp-for="SearchRequest.EndYear" class="form-control form-control-lg" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="SearchRequest.DayOfMonth" class="form-label fw-semibold"></label>
+                            <input asp-for="SearchRequest.DayOfMonth" class="form-control form-control-lg" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="SearchRequest.DayOfWeek" class="form-label fw-semibold"></label>
+                            <select asp-for="SearchRequest.DayOfWeek" asp-items="Model.DayOfWeekOptions" class="form-select form-select-lg"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1" id="searchSubmitBtn">
+                            Find matches
+                        </button>
+                        <a asp-page="/Index" class="btn btn-outline-secondary btn-lg">
+                            Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card app-card results-card h-100">
+            <div class="card-header app-card-header d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0">Results</h2>
+                <span id="resultsCountBadge" class="badge rounded-pill results-count-badge d-none"></span>
+            </div>
+            <div class="card-body" id="resultsPanel">
+                <div id="resultsEmpty" class="empty-state empty-state-compact">
+                    <div class="empty-state-icon">🔍</div>
+                    <h3 class="h6 mb-2">No search yet</h3>
+                    <p class="text-muted mb-0">Fill in the criteria and run a search to see matching month–year values here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/index.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,34 @@
+﻿@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="page-header mb-4">
+    <div>
+        <p class="page-eyebrow mb-1">Something went wrong</p>
+        <h1 class="page-title mb-2">Unexpected error</h1>
+        <p class="page-subtitle mb-0">An error occurred while processing your request.</p>
+    </div>
+</div>
+
+<div class="card app-card">
+    <div class="card-body p-4">
+        @if (Model.ShowRequestId)
+        {
+            <p class="mb-3">
+                <span class="text-muted">Request ID:</span>
+                <code class="ms-1">@Model.RequestId</code>
+            </p>
+        }
+
+        <p class="text-muted mb-4">
+            Please try again or return to the search page. If the problem persists, check the application logs.
+        </p>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-page="/Index" class="btn btn-primary">Back to Search</a>
+            <a asp-page="/Logs" class="btn btn-outline-secondary">View Logs</a>
+        </div>
+    </div>
+</div>
